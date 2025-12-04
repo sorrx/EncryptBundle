@@ -2,10 +2,10 @@
 
 namespace SpecShaper\EncryptBundle\EventListener;
 
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use SpecShaper\EncryptBundle\Encryptors\EncryptorInterface;
 use SpecShaper\EncryptBundle\Event\EncryptEventInterface;
 use SpecShaper\EncryptBundle\Event\EncryptEvents;
-use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 
 /**
  * Doctrine event listener which encrypts/decrypts entities.
@@ -26,8 +26,6 @@ class EncryptEventListener
 
     /**
      * EncryptEventListener constructor.
-     *
-     * @param $isDisabled
      */
     public function __construct(EncryptorInterface $encryptor, bool $isDisabled)
     {
@@ -42,7 +40,7 @@ class EncryptEventListener
     {
         return $this->encryptor;
     }
-    
+
     /**
      * Use an Encrypt even to encrypt a value.
      */

@@ -6,7 +6,6 @@ use SpecShaper\EncryptBundle\Encryptors\EncryptorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-
 class EncryptExtension extends AbstractExtension
 {
     /**
@@ -24,14 +23,14 @@ class EncryptExtension extends AbstractExtension
      */
     public function getFilters(): array
     {
-        return array(
-            new TwigFilter('decrypt', array($this, 'decryptFilter'))
-        );
+        return [
+            new TwigFilter('decrypt', [$this, 'decryptFilter']),
+        ];
     }
 
     public function decryptFilter($data)
     {
-        return  $this->encryptor->decrypt($data);
+        return $this->encryptor->decrypt($data);
     }
 
     public function getName()

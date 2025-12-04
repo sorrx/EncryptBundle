@@ -2,20 +2,20 @@
 
 namespace SpecShaper\EncryptBundle\Command;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
+use SpecShaper\EncryptBundle\Encryptors\EncryptorInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Command\Command;
-use SpecShaper\EncryptBundle\Encryptors\EncryptorInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * bin/console encrypt:database decrypt --manager=default
+ * bin/console encrypt:database decrypt --manager=default.
  */
 #[AsCommand(
     name: 'encrypt:database',
@@ -23,29 +23,26 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class EncryptDatabaseCommand extends Command
 {
+    private EntityManagerInterface $em;
 
-    private ?EntityManagerInterface $em;
-    
     private array $encryptedFields = [];
 
     public function __construct(
         private readonly EncryptorInterface $encryptor,
         private readonly ManagerRegistry $registry,
-        private readonly array $annotationArray
-    )
-    {
+        private readonly array $annotationArray,
+    ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this->addArgument('direction', InputArgument::REQUIRED,'Encrypt or Decrypt db.');
-        $this->addOption('manager', null,InputOption::VALUE_OPTIONAL,'Nominate the database connection manager name.');
+        $this->addArgument('direction', InputArgument::REQUIRED, 'Encrypt or Decrypt db.');
+        $this->addOption('manager', null, InputOption::VALUE_OPTIONAL, 'Nominate the database connection manager name.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-
         $io = new SymfonyStyle($input, $output);
 
         $direction = $input->getArgument('direction');
@@ -53,24 +50,25 @@ class EncryptDatabaseCommand extends Command
 
         $managerNameOption = $input->getOption('manager');
 
-        if(!empty($managerNameOption)) {
+        if (!empty($managerNameOption)) {
             $managerName = $managerNameOption;
         }
 
-        $this->em = $this->registry->getManager($managerName);
-        
+        /** @var EntityManagerInterface $em */
+        $em = $this->registry->getManager($managerName);
+        $this->em = $em;
+
         $this->getEncryptedFields();
 
         $io->title('Decrypting the database');
 
         $tables = count($this->encryptedFields);
 
-        $io->writeln($tables . ' tables to decrypt');
+        $io->writeln($tables.' tables to decrypt');
 
         $io->progressStart($tables);
 
-        foreach ($this->encryptedFields as $tableName => $fieldArray){
-
+        foreach ($this->encryptedFields as $tableName => $fieldArray) {
             $this->decryptTable($tableName, $fieldArray, $direction);
             $io->progressAdvance();
         }
@@ -93,11 +91,9 @@ class EncryptDatabaseCommand extends Command
 
         $decryptedFields = [];
 
-        foreach($resultRows as $resultRow)
-        {
+        foreach ($resultRows as $resultRow) {
             foreach ($resultRow as $fieldName => $value) {
-
-                if('id' === $fieldName){
+                if ('id' === $fieldName) {
                     continue;
                 }
 
@@ -116,14 +112,12 @@ class EncryptDatabaseCommand extends Command
 
     private function getEncryptedFields(): array
     {
-
         /** @var ClassMetadata[] $meta */
         $meta = $this->em->getMetadataFactory()->getAllMetadata();
 
         // Loop through entities
         foreach ($meta as $entityMeta) {
-
-            if($entityMeta->isMappedSuperclass){
+            if ($entityMeta->isMappedSuperclass) {
                 continue;
             }
 
@@ -136,9 +130,7 @@ class EncryptDatabaseCommand extends Command
             $classMeta = $this->em->getClassMetadata($entityMeta->getName());
 
             foreach ($properties as $key => $refProperty) {
-
                 if ($this->isEncryptedProperty($refProperty)) {
-
                     if (!isset($this->encryptedFields[$tableName])) {
                         $this->encryptedFields[$tableName] = [];
                     }
@@ -154,10 +146,8 @@ class EncryptDatabaseCommand extends Command
 
     private function isEncryptedProperty(\ReflectionProperty $refProperty): bool
     {
-
         foreach ($refProperty->getAttributes() as $refAttribute) {
-
-            if (in_array($refAttribute->getName(), $this->annotationArray)) {
+            if (in_array($refAttribute->getName(), $this->annotationArray, true)) {
                 return true;
             }
         }

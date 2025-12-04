@@ -24,7 +24,7 @@ class GenKeyCommand extends Command
         $encryption_key_256bit = base64_encode(openssl_random_pseudo_bytes(32));
         $io = new SymfonyStyle($input, $output);
         $io->title('Generated Key');
-        $io->success('Key is: ' . $encryption_key_256bit);
+        $io->success('Key is: '.$encryption_key_256bit);
 
         return Command::SUCCESS;
     }

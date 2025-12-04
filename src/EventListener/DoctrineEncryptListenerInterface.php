@@ -2,9 +2,9 @@
 
 namespace SpecShaper\EncryptBundle\EventListener;
 
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use SpecShaper\EncryptBundle\Encryptors\EncryptorInterface;
 
 /**
@@ -18,7 +18,7 @@ interface DoctrineEncryptListenerInterface
         EncryptorInterface $encryptor,
         EntityManagerInterface $em,
         array $annotationArray,
-        bool $isDisabled
+        bool $isDisabled,
     );
 
     /**

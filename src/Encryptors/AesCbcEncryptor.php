@@ -4,8 +4,8 @@ namespace SpecShaper\EncryptBundle\Encryptors;
 
 use SpecShaper\EncryptBundle\Event\EncryptKeyEvent;
 use SpecShaper\EncryptBundle\Event\EncryptKeyEvents;
-use SpecShaper\EncryptBundle\Exception\EncryptException;
 use SpecShaper\EncryptBundle\EventListener\DoctrineEncryptListenerInterface;
+use SpecShaper\EncryptBundle\Exception\EncryptException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -13,7 +13,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *
  * @author Mark Ogilvie <mark.ogilvie@ogilvieconsulting.net>
  */
-class AesCbcEncryptor implements EncryptorInterface
+class AesCbcEncryptor implements \Stringable, EncryptorInterface
 {
     public const METHOD = 'aes-256-cbc';
 
@@ -37,9 +37,9 @@ class AesCbcEncryptor implements EncryptorInterface
         return self::class.':'.self::METHOD;
     }
 
-    public function setSecretKey(string $secretKey): void
+    public function setSecretKey(string $key): void
     {
-        $this->secretKey = $secretKey;
+        $this->secretKey = $key;
     }
 
     /**
@@ -100,7 +100,7 @@ class AesCbcEncryptor implements EncryptorInterface
 
         $key = $this->getSecretKey();
 
-        $data = base64_decode($data);
+        $data = base64_decode($data, true);
 
         $ivsize = openssl_cipher_iv_length(self::METHOD);
         $iv = mb_substr($data, 0, $ivsize, '8bit');
@@ -142,7 +142,7 @@ class AesCbcEncryptor implements EncryptorInterface
         }
 
         // Decode the key
-        $key = base64_decode($this->secretKey);
+        $key = base64_decode($this->secretKey, true);
 
         $keyLengthOctet = mb_strlen($key, '8bit');
 

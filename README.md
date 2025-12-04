@@ -151,12 +151,9 @@ will be discontinued in the next major update.
     /**
      * Date of birth
      * 
-     * @Encrypted
-     * Note that the above Encrypted property is a legacy annotation, and while
-     * it still is supported, it will be deprecated in favour of Attributes.
-     * 
      * @ORM\Column(type="string", nullable=true)
      */
+    #[Encrypted]
     protected ?String $dob;
    
 ```
@@ -291,7 +288,7 @@ You can decrypt/encrypt the entire database using the following
 $ bin/console encrypt:database decrypt connection
 ```
 
-The requried argument should be decrypt or encrypt.
+The requried argument should be `decrypt` or `encrypt`.
 
 There is an option to define the database connection if you employ multiple connections in your application.
 

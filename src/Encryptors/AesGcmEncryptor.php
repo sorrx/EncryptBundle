@@ -4,11 +4,11 @@ namespace SpecShaper\EncryptBundle\Encryptors;
 
 use SpecShaper\EncryptBundle\Event\EncryptKeyEvent;
 use SpecShaper\EncryptBundle\Event\EncryptKeyEvents;
-use SpecShaper\EncryptBundle\Exception\EncryptException;
 use SpecShaper\EncryptBundle\EventListener\DoctrineEncryptListenerInterface;
+use SpecShaper\EncryptBundle\Exception\EncryptException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class AesGcmEncryptor implements EncryptorInterface
+class AesGcmEncryptor implements \Stringable, EncryptorInterface
 {
     public const METHOD = 'aes-256-gcm';
 
@@ -34,9 +34,9 @@ class AesGcmEncryptor implements EncryptorInterface
         return self::class.':'.self::METHOD;
     }
 
-    public function setSecretKey(string $secretKey): void
+    public function setSecretKey(string $key): void
     {
-        $this->secretKey = $secretKey;
+        $this->secretKey = $key;
     }
 
     public function setDefaultAssociatedData(?string $defaultAssociatedData): void
@@ -73,7 +73,7 @@ class AesGcmEncryptor implements EncryptorInterface
             $associatedData
         );
 
-        if ($ciphertext === false) {
+        if (false === $ciphertext) {
             throw new EncryptException('Encryption failed.');
         }
 
@@ -99,7 +99,7 @@ class AesGcmEncryptor implements EncryptorInterface
         }
 
         $key = $this->getSecretKey();
-        $data = base64_decode($data);
+        $data = base64_decode($data, true);
         $ivsize = openssl_cipher_iv_length(self::METHOD);
         $iv = mb_substr($data, 0, $ivsize, '8bit');
         $tag = mb_substr($data, $ivsize, 16, '8bit');
@@ -115,13 +115,12 @@ class AesGcmEncryptor implements EncryptorInterface
             $columnName
         );
 
-        if ($plaintext === false) {
+        if (false === $plaintext) {
             throw new EncryptException('Decryption failed.');
         }
 
         return $plaintext;
     }
-
 
     /**
      * Get the secret key.
@@ -145,7 +144,7 @@ class AesGcmEncryptor implements EncryptorInterface
             Use cli command "php bin/console encrypt:genkey" to create a key, or set via a listener on the EncryptKeyEvents::LOAD_KEY event');
         }
 
-        $key = base64_decode($this->secretKey);
+        $key = base64_decode($this->secretKey, true);
         $keyLengthOctet = mb_strlen($key, '8bit');
 
         if (32 !== $keyLengthOctet) {
